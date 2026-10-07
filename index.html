@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 經濟學系秋季探索營 - 報名系統與 Google Workspace 整合平台</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #0f172a;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card-light {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-100 antialiased selection:bg-blue-500 selection:text-white custom-scrollbar">
+
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-teal-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-chart-line text-white"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-base sm:text-lg leading-tight tracking-wide text-white">經濟學系營隊活動報名系統</h1>
+                        <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-300 border border-blue-400/30">Workspace Integrated</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">2026 經濟脈動與數據賽局探索營</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <a id="btnAddToGoogleCal" href="#" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-blue-300 px-3 py-2 rounded-xl border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-calendar-plus text-blue-400"></i>
+                    <span class="hidden md:inline">加到 Google 日曆</span>
+                </a>
+
+                <button id="btnViewRegistrants" onclick="openPasswordModal()" class="text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3.5 py-2 rounded-xl transition shadow-md flex items-center space-x-2 font-medium">
+                    <i class="fa-solid fa-user-gear text-blue-200"></i>
+                    <span>管理報名名單 (<span id="attendeeCount">0</span>)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl mb-8 p-6 sm:p-8 border border-slate-800">
+            <div class="absolute -right-16 -top-16 w-72 h-72 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-72 h-72 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold tracking-wide">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+                            <span>2026 學年度精選營隊</span>
+                        </span>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-medium flex items-center gap-1">
+                            <i class="fa-brands fa-google"></i> Google Sheets 即時同步
+                        </span>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-snug bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-blue-200">
+                        經濟脈動與數據賽局探索營
+                    </h2>
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-2xl">
+                        深入剖析全球市場動態、個體決策邏輯與行為經濟學應用。專為對經濟分析、賽局策略與商業創新感興趣的同學量身打造！
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="flex items-center space-x-3 bg-slate-900/60 backdrop-blur-md px-4 py-3 rounded-2xl border border-slate-800">
+                            <i class="fa-regular fa-calendar-check text-blue-400 text-xl"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-400">活動日期</div>
+                                <div class="text-xs sm:text-sm font-bold text-white">10 月 07 日 (三)</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 bg-slate-900/60 backdrop-blur-md px-4 py-3 rounded-2xl border border-slate-800">
+                            <i class="fa-regular fa-clock text-amber-400 text-xl"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-400">活動時間</div>
+                                <div class="text-xs sm:text-sm font-bold text-white">晚上 19:00 - 21:00</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 bg-slate-900/60 backdrop-blur-md px-4 py-3 rounded-2xl border border-slate-800">
+                            <i class="fa-solid fa-location-dot text-emerald-400 text-xl"></i>
+                            <div>
+                                <div class="text-[11px] text-slate-400">活動地點</div>
+                                <div class="text-xs sm:text-sm font-bold text-white">經濟系館 101 講堂</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 space-y-4 text-center shadow-xl">
+                    <div>
+                        <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">距離活動開辦倒數</span>
+                        <div class="flex justify-center items-center space-x-2 mt-2" id="countdownTimer">
+                            <div class="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 min-w-[54px]">
+                                <span class="block text-xl font-bold font-mono text-blue-400" id="cdDays">00</span>
+                                <span class="text-[10px] text-slate-400">天</span>
+                            </div>
+                            <span class="text-slate-600 font-bold">:</span>
+                            <div class="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 min-w-[54px]">
+                                <span class="block text-xl font-bold font-mono text-blue-400" id="cdHours">00</span>
+                                <span class="text-[10px] text-slate-400">時</span>
+                            </div>
+                            <span class="text-slate-600 font-bold">:</span>
+                            <div class="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 min-w-[54px]">
+                                <span class="block text-xl font-bold font-mono text-blue-400" id="cdMins">00</span>
+                                <span class="text-[10px] text-slate-400">分</span>
+                            </div>
+                            <span class="text-slate-600 font-bold">:</span>
+                            <div class="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 min-w-[54px]">
+                                <span class="block text-xl font-bold font-mono text-blue-400" id="cdSecs">00</span>
+                                <span class="text-[10px] text-slate-400">秒</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800">
+                        <div class="flex justify-between text-xs text-slate-300 mb-1.5 font-medium">
+                            <span>報名席位進度</span>
+                            <span id="capacityStatusText">已報名 0 / 40 名</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-800">
+                            <div id="capacityBar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-7 xl:col-span-8">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-5 mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square text-blue-500"></i>
+                                活動報名表單
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">填寫報名資料後將即時寫入系統並自動同步至 Google 試算表。</p>
+                        </div>
+                        <span class="hidden sm:inline-flex items-center text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-medium border border-emerald-500/20">
+                            <i class="fa-solid fa-circle-check mr-1.5 text-[10px]"></i>開放報名中
+                        </span>
+                    </div>
+
+                    <form id="registrationForm" onsubmit="handleFormSubmit(event)" class="space-y-6" novalidate>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label for="studentId" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                                    學號 <span class="text-rose-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                        <i class="fa-solid fa-id-card text-sm"></i>
+                                    </div>
+                                    <input type="text" id="studentId" name="studentId" required 
+                                        placeholder="例如：B11305001"
+                                        oninput="onInputChange()"
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-white font-mono uppercase transition outline-none">
+                                </div>
+                                <p id="errStudentId" class="hidden text-[11px] text-rose-400 mt-1 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-exclamation"></i> 請輸入學號 (英文或數字)
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="studentName" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                                    姓名 <span class="text-rose-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                        <i class="fa-solid fa-user text-sm"></i>
+                                    </div>
+                                    <input type="text" id="studentName" name="studentName" required
+                                        placeholder="例如：林經濟"
+                                        oninput="onInputChange()"
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-white transition outline-none">
+                                </div>
+                                <p id="errStudentName" class="hidden text-[11px] text-rose-400 mt-1 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-exclamation"></i> 請輸入您的姓名
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-2">
+                                選擇欲參與的分組 (A/B/C) <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <label class="group-card relative flex flex-col p-4 rounded-2xl border-2 border-slate-800 cursor-pointer hover:border-blue-500 transition-all bg-slate-900/60 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-950/40">
+                                    <input type="radio" name="groupSelect" value="A" checked onchange="onInputChange()" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 font-extrabold text-xs font-mono flex items-center justify-center border border-blue-500/30">A</span>
+                                    </div>
+                                    <h4 class="font-bold text-white text-xs sm:text-sm">財務與巨觀經濟組</h4>
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">通膨、匯率與全球金融市場趨勢。</p>
+                                </label>
+
+                                <label class="group-card relative flex flex-col p-4 rounded-2xl border-2 border-slate-800 cursor-pointer hover:border-purple-500 transition-all bg-slate-900/60 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-950/40">
+                                    <input type="radio" name="groupSelect" value="B" onchange="onInputChange()" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 font-extrabold text-xs font-mono flex items-center justify-center border border-purple-500/30">B</span>
+                                    </div>
+                                    <h4 class="font-bold text-white text-xs sm:text-sm">數據分析與賽局理論</h4>
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">賽局策略與 Python 數據模型。</p>
+                                </label>
+
+                                <label class="group-card relative flex flex-col p-4 rounded-2xl border-2 border-slate-800 cursor-pointer hover:border-emerald-500 transition-all bg-slate-900/60 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-950/40">
+                                    <input type="radio" name="groupSelect" value="C" onchange="onInputChange()" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-extrabold text-xs font-mono flex items-center justify-center border border-emerald-500/30">C</span>
+                                    </div>
+                                    <h4 class="font-bold text-white text-xs sm:text-sm">行為經濟與商業創新</h4>
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">人類心理偏誤與推力理論應用。</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="studentEmail" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                                電子信箱 (Email) <span class="text-rose-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                    <i class="fa-solid fa-envelope text-sm"></i>
+                                </div>
+                                <input type="email" id="studentEmail" name="studentEmail" required
+                                    placeholder="例如：student@university.edu.tw"
+                                    oninput="onInputChange()"
+                                    class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700/80 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-white transition outline-none">
+                            </div>
+                            <p id="errStudentEmail" class="hidden text-[11px] text-rose-400 mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i> 請輸入正確格式的 Email 信箱
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                            <label class="flex items-start space-x-3 cursor-pointer">
+                                <input type="checkbox" id="agreeTerms" required class="mt-0.5 w-4 h-4 text-blue-600 rounded bg-slate-950 border-slate-700 focus:ring-blue-500">
+                                <span class="text-xs text-slate-400 leading-relaxed">
+                                    我已確認個人資料無誤，並同意遵守營隊規範。活動當天（10/07 晚上 19:00）將準時至經濟系館 101 講堂出席。
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="btnSubmit" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-blue-600/20 transition-all duration-200 transform active:scale-[0.99] flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>確認送出報名 (Create)</span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 xl:col-span-4 space-y-6">
+                
+                <div class="bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl p-6 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[11px] font-semibold tracking-wider text-slate-300 uppercase">即時入場證預覽</span>
+                        </div>
+                        <span class="text-[10px] bg-blue-500/20 text-blue-300 font-mono px-2 py-0.5 rounded border border-blue-400/30">PASS TICKET</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-[11px] text-slate-400">學員姓名</div>
+                            <div class="text-lg font-extrabold text-white tracking-wide mt-0.5" id="previewName">尚未填寫</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-slate-400 block text-[10px]">報名學號</span>
+                                <span class="font-mono text-slate-200 font-semibold text-xs" id="previewId">--</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block text-[10px]">參與組別</span>
+                                <span class="inline-block mt-0.5 font-bold px-2 py-0.5 rounded text-[11px] bg-blue-500/20 text-blue-300 border border-blue-400/20" id="previewGroup">A 組 - 財務與巨觀</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-slate-400 text-[10px] block">聯絡電子信箱</span>
+                            <span class="text-xs text-slate-300 truncate block font-mono" id="previewEmail">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-5 shadow-xl border border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <span class="text-xs font-bold text-white flex items-center gap-2">
+                            <i class="fa-brands fa-google text-blue-400"></i> Google Workspace 整合工具
+                        </span>
+                        <span id="gasSyncBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded-full border border-emerald-500/30">
+                            試算表已連線
+                        </span>
+                    </div>
+
+                    <div class="space-y-2.5 text-xs text-slate-300">
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-table text-emerald-400"></i> Google Sheets API
+                            </span>
+                            <span class="text-[10px] font-mono text-slate-400">CRUD 自動備份</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-calendar text-blue-400"></i> Google Calendar
+                            </span>
+                            <span class="text-[10px] font-mono text-slate-400">10/07 19:00 - 21:00</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-envelope text-amber-400"></i> Gmail 通知範本
+                            </span>
+                            <button onclick="openGmailTemplateModal()" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-blue-300 border border-slate-700">
+                                產生信件範本
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="successModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl border border-slate-800 transform transition-all scale-95 opacity-0 overflow-hidden relative" id="successModalCard">
+            
+            <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 text-white -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 p-5 mb-5 flex items-center justify-between shadow-md">
+                <div class="flex items-center space-x-3 text-left">
+                    <i class="fa-solid fa-ticket-simple text-3xl text-emerald-200"></i>
+                    <div>
+                        <span class="text-[10px] text-emerald-100 font-mono tracking-wide block">2026 經濟學系探索營</span>
+                        <span class="font-extrabold text-sm sm:text-base tracking-wide">報名成功．活動入場憑證</span>
+                    </div>
+                </div>
+                <span class="bg-slate-950/40 text-white text-xs font-mono font-extrabold px-3 py-1.5 rounded-xl border border-white/20" id="mPassId">PASS-8842</span>
+            </div>
+
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl border border-emerald-500/30">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <h3 class="text-xl font-extrabold text-white mb-1">報名完成！</h3>
+            <p class="text-xs text-slate-400">已將資料寫入系統與 Google 試算表，請保存下方憑證。</p>
+            
+            <div class="bg-slate-950 rounded-2xl p-4 text-left space-y-3 my-4 border border-slate-800">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">學員姓名</span>
+                        <span class="font-bold text-white text-xs sm:text-sm" id="mStudentName">--</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">報名學號</span>
+                        <span class="font-bold text-slate-200 font-mono text-xs sm:text-sm" id="mStudentId">--</span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-slate-400 block text-[10px]">參與分組</span>
+                        <span class="font-bold text-blue-400 text-xs" id="mGroupName">--</span>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div id="mQrContainer" class="bg-white p-1.5 rounded-xl shrink-0"></div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-mono">Verification Code</span>
+                            <span class="text-xs font-mono font-extrabold text-emerald-400" id="mTicketCode">EC2026-PASS</span>
+                        </div>
+                    </div>
+                    <button onclick="copyPassDetails()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-xl border border-slate-700 transition">
+                        <i class="fa-regular fa-copy text-blue-400"></i> 複製憑證
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a id="mGoogleCalBtn" href="#" target="_blank" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-calendar-plus"></i> 加到 Google 日曆
+                </a>
+                <button onclick="closeSuccessModal()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+                    確定關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-800">
+            <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl border border-blue-500/30">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">管理者密碼驗證</h3>
+            <p class="text-xs text-slate-400 mb-4">解鎖最新報名名單與 Google 試算表 CRUD 設定</p>
+            
+            <form onsubmit="verifyPassword(event)" class="space-y-4" novalidate>
+                <div>
+                    <input type="password" id="adminPassword" placeholder="請輸入密碼 (預設: 1234)" required
+                        class="w-full text-center tracking-widest px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 focus:ring-2 focus:ring-blue-500 text-sm font-mono text-white outline-none">
+                    <p id="errPassword" class="hidden text-xs text-rose-400 mt-2">
+                        <i class="fa-solid fa-circle-exclamation"></i> 密碼錯誤，請重新輸入！
+                    </p>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closePasswordModal()" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-700 transition">
+                        取消
+                    </button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-500 transition">
+                        解鎖進入
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="registrantsModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-5xl w-full p-6 shadow-2xl border border-slate-800 flex flex-col max-h-[90vh]">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-brands fa-google text-blue-400"></i>
+                        <span>報名名單管理 (Google 試算表 CRUD 模式)</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">點擊操作列可修改或刪除雲端/本機紀錄，資料將同步反映至 Google Sheets。</p>
+                </div>
+                <button onclick="toggleRegistrantsModal(false)" class="text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 my-4">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+                    <input type="text" id="searchFilter" oninput="renderRegistrantsTable()" placeholder="搜尋學號或姓名..." 
+                        class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 text-white rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-400">篩選組別：</span>
+                    <select id="groupFilter" onchange="renderRegistrantsTable()" class="bg-slate-950 text-white px-2.5 py-1.5 rounded-xl border border-slate-800 focus:outline-none">
+                        <option value="ALL">全部組別</option>
+                        <option value="A">Group A (財務巨觀)</option>
+                        <option value="B">Group B (數據賽局)</option>
+                        <option value="C">Group C (行為創新)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar flex-1 border border-slate-800 rounded-2xl bg-slate-950/50">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-900 text-slate-300 font-bold sticky top-0 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">#</th>
+                            <th class="p-3">學號</th>
+                            <th class="p-3">姓名</th>
+                            <th class="p-3">分組</th>
+                            <th class="p-3">電子信箱</th>
+                            <th class="p-3">報名時間</th>
+                            <th class="p-3 text-center">操作 (Update/Delete)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrantsTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- JS Dynamic Injection -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pt-4 flex items-center justify-between border-t border-slate-800 mt-2">
+                <span class="text-xs text-slate-400">總計：<strong id="totalCountText" class="text-blue-400 font-mono">0</strong> 筆報名資料</span>
+                <button onclick="toggleRegistrantsModal(false)" class="px-5 py-2.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl hover:bg-slate-700 transition">
+                    關閉面板
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-800">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-pen text-blue-400"></i> 修改學員報名資料
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleUpdateSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">學號 (不可變更)</label>
+                    <input type="text" id="editStudentId" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 text-slate-400 font-mono text-xs border border-slate-800">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">姓名</label>
+                    <input type="text" id="editStudentName" required class="w-full px-3 py-2 rounded-xl bg-slate-950 text-white border border-slate-700 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">分組</label>
+                    <select id="editStudentGroup" class="w-full px-3 py-2 rounded-xl bg-slate-950 text-white border border-slate-700 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="A">Group A - 財務與巨觀經濟</option>
+                        <option value="B">Group B - 數據分析與賽局理論</option>
+                        <option value="C">Group C - 行為經濟與商業創新</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">電子信箱</label>
+                    <input type="email" id="editStudentEmail" required class="w-full px-3 py-2 rounded-xl bg-slate-950 text-white border border-slate-700 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div class="flex space-x-2 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-700 transition">
+                        取消
+                    </button>
+                    <button type="submit" id="btnUpdateSave" class="w-1/2 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-500 transition">
+                        儲存修改 (Update)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="gmailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-800">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-envelope-open-text text-amber-400"></i> Gmail / Workspace 通知信樣式
+                </h3>
+                <button onclick="closeGmailModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xs text-slate-400">下方為可直接貼入 Gmail 發送給參加者的通知範本：</p>
+                <textarea id="gmailContentText" readonly rows="8" class="w-full p-3 rounded-2xl bg-slate-950 text-slate-300 border border-slate-800 text-xs font-mono focus:outline-none"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-4">
+                <button onclick="copyGmailTemplate()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition">
+                    <i class="fa-regular fa-copy"></i> 複製範本內容
+                </button>
+                <button onclick="closeGmailModal()" class="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl transition">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-800 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-info text-blue-400 text-base" id="toastIcon"></i>
+        <span id="toastMsg">通知訊息內容</span>
+    </div>
+
+    <script>
+        let registrants = [
+            { id: "B11305012", name: "張明", group: "A", email: "student1@univ.edu.tw", time: "10/01 14:20", passId: "PASS-1021", ticketCode: "EC2026-5012-1021" },
+            { id: "B11305045", name: "陳婷", group: "B", email: "student2@univ.edu.tw", time: "10/01 16:05", passId: "PASS-1022", ticketCode: "EC2026-5045-1022" },
+            { id: "B11305088", name: "黃豪", group: "C", email: "student3@univ.edu.tw", time: "10/02 09:30", passId: "PASS-1023", ticketCode: "EC2026-5088-1023" }
+        ];
+
+        const TOTAL_CAPACITY = 40;
+        const gasApiUrl = 'https://script.google.com/macros/s/AKfycbyEbFUl1fSfJa4aq-Iztd6vKEqCKRnZb3U-cmiPkAlCWoSCiY1V-lv0hIbLA03VgphX/exec';
+
+        const GROUP_NAMES = {
+            'A': 'A 組 - 財務與巨觀經濟',
+            'B': 'B 組 - 數據分析與賽局理論',
+            'C': 'C 組 - 行為經濟與商業創新'
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCountdown();
+            initGoogleCalendarLink();
+            updateGasBadge(true);
+            fetchRegistrantsFromGAS();
+            onInputChange();
+        });
+
+        function initGoogleCalendarLink() {
+            const title = encodeURIComponent("2026 經濟學系秋季探索營 - 經濟脈動與數據賽局");
+            const details = encodeURIComponent("感謝報名經濟系探索營！時間：10/07 19:00-21:00，地點：經濟系館 101 講堂。");
+            const location = encodeURIComponent("經濟系館 101 講堂");
+            const dates = "20261007T110000Z/20261007T130000Z";
+            
+            const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+            
+            document.getElementById('btnAddToGoogleCal').href = calUrl;
+            document.getElementById('mGoogleCalBtn').href = calUrl;
+        }
+
+        function initCountdown() {
+            const eventDate = new Date(2026, 9, 7, 19, 0, 0).getTime();
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = eventDate - now;
+
+                if (distance < 0) {
+                    document.getElementById('cdDays').innerText = "00";
+                    document.getElementById('cdHours').innerText = "00";
+                    document.getElementById('cdMins').innerText = "00";
+                    document.getElementById('cdSecs').innerText = "00";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById('cdDays').innerText = days < 10 ? '0' + days : days;
+                document.getElementById('cdHours').innerText = hours < 10 ? '0' + hours : hours;
+                document.getElementById('cdMins').innerText = minutes < 10 ? '0' + minutes : minutes;
+                document.getElementById('cdSecs').innerText = seconds < 10 ? '0' + seconds : seconds;
+            }
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        function onInputChange() {
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const studentEmail = document.getElementById('studentEmail').value.trim();
+            const selectedGroup = document.querySelector('input[name="groupSelect"]:checked')?.value || 'A';
+
+            document.getElementById('previewName').innerText = studentName || "尚未填寫";
+            document.getElementById('previewId').innerText = studentId.toUpperCase() || "--";
+            document.getElementById('previewEmail').innerText = studentEmail || "--";
+            document.getElementById('previewGroup').innerText = GROUP_NAMES[selectedGroup];
+        }
+
+        function updateGasBadge(isLinked) {
+            const badge = document.getElementById('gasSyncBadge');
+            if (isLinked) {
+                badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Google 試算表已連線`;
+            } else {
+                badge.className = "text-[10px] bg-amber-500/20 text-amber-300 font-medium px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1";
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 本機模式`;
+            }
+        }
+
+        async function fetchRegistrantsFromGAS() {
+            if (!gasApiUrl) return;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                const res = await fetch(`${gasApiUrl}?action=read`, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) throw new Error(`HTTP status ${res.status}`);
+
+                const json = await res.json();
+                if ((json.status === 'success' || json.success === true) && Array.isArray(json.data)) {
+                    if (json.data.length > 0) {
+                        registrants = json.data.map((item, idx) => ({
+                            id: item.studentId || item.id || `STU${idx}`,
+                            name: item.name || '未知名稱',
+                            group: item.group || 'A',
+                            email: item.email || '',
+                            time: item.timestamp || item.time || new Date().toLocaleString("zh-TW", { hour12: false }),
+                            passId: item.passId || item.id || `PASS-${1021 + idx}`,
+                            ticketCode: item.ticketCode || `EC2026-${(item.studentId || item.id || '0000').slice(-4)}-${1021 + idx}`
+                        }));
+                    }
+                    updateRegistrantStats();
+                    if (!document.getElementById('registrantsModal').classList.contains('hidden')) {
+                        renderRegistrantsTable();
+                    }
+                    updateGasBadge(true);
+                    showToast("已成功同步 Google 試算表最新資料！", "success");
+                }
+            } catch (err) {
+                updateGasBadge(false);
+                updateRegistrantStats();
+                if (!document.getElementById('registrantsModal').classList.contains('hidden')) {
+                    renderRegistrantsTable();
+                }
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const studentIdInput = document.getElementById('studentId');
+            const studentNameInput = document.getElementById('studentName');
+            const studentEmailInput = document.getElementById('studentEmail');
+            const agreeTerms = document.getElementById('agreeTerms');
+
+            const studentId = studentIdInput.value.trim().toUpperCase();
+            const studentName = studentNameInput.value.trim();
+            const studentEmail = studentEmailInput.value.trim();
+            const selectedGroup = document.querySelector('input[name="groupSelect"]:checked')?.value || 'A';
+
+            let isValid = true;
+            const idPattern = /^[A-Za-z0-9]+$/;
+            if (!studentId || !idPattern.test(studentId)) {
+                showFieldError('errStudentId', true);
+                isValid = false;
+            } else showFieldError('errStudentId', false);
+
+            if (!studentName) {
+                showFieldError('errStudentName', true);
+                isValid = false;
+            } else showFieldError('errStudentName', false);
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!studentEmail || !emailPattern.test(studentEmail)) {
+                showFieldError('errStudentEmail', true);
+                isValid = false;
+            } else showFieldError('errStudentEmail', false);
+
+            if (!agreeTerms.checked) {
+                showToast("請先勾選同意活動規範條款！", "warning");
+                return;
+            }
+
+            if (!isValid) return;
+
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>寫入 Google 試算表中...</span>`;
+
+            const passNumber = Math.floor(1000 + Math.random() * 9000);
+            const passIdStr = `PASS-${passNumber}`;
+            const ticketCodeStr = `EC2026-${studentId.slice(-4)}-${passNumber}`;
+            const timeStr = new Date().toLocaleString("zh-TW", { hour12: false });
+
+            const newRecord = {
+                action: 'create',
+                id: studentId,
+                studentId: studentId,
+                name: studentName,
+                group: selectedGroup,
+                email: studentEmail,
+                time: timeStr,
+                passId: passIdStr,
+                ticketCode: ticketCodeStr
+            };
+
+            registrants.unshift(newRecord);
+            updateRegistrantStats();
+
+            if (gasApiUrl) {
+                try {
+                    await fetch(gasApiUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newRecord)
+                    });
+                    showToast("報名成功！資料已同步寫入 Google 試算表", "success");
+                } catch (err) {
+                    console.error("GAS Create Error:", err);
+                }
+            }
+
+            document.getElementById('mPassId').innerText = passIdStr;
+            document.getElementById('mTicketCode').innerText = ticketCodeStr;
+            document.getElementById('mStudentId').innerText = studentId;
+            document.getElementById('mStudentName').innerText = studentName;
+            document.getElementById('mGroupName').innerText = GROUP_NAMES[selectedGroup];
+
+            const qrContainer = document.getElementById('mQrContainer');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: `EC2026|${passIdStr}|${studentId}|${studentName}`,
+                width: 72,
+                height: 72,
+                colorDark : "#020617",
+                colorLight : "#ffffff"
+            });
+
+            openSuccessModal();
+
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>確認送出報名 (Create)</span>`;
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+            }
+        }
+
+        function openEditModal(studentId) {
+            const item = registrants.find(r => r.id === studentId);
+            if (!item) return;
+
+            document.getElementById('editStudentId').value = item.id;
+            document.getElementById('editStudentName').value = item.name;
+            document.getElementById('editStudentGroup').value = item.group;
+            document.getElementById('editStudentEmail').value = item.email;
+
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        async function handleUpdateSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editStudentId').value;
+            const name = document.getElementById('editStudentName').value.trim();
+            const group = document.getElementById('editStudentGroup').value;
+            const email = document.getElementById('editStudentEmail').value.trim();
+
+            const item = registrants.find(r => r.id === id);
+            if (item) {
+                item.name = name;
+                item.group = group;
+                item.email = email;
+            }
+
+            const btnSave = document.getElementById('btnUpdateSave');
+            btnSave.disabled = true;
+            btnSave.innerText = "更新中...";
+
+            if (gasApiUrl) {
+                try {
+                    await fetch(gasApiUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'update', id, studentId: id, name, group, email })
+                    });
+                    showToast("修改資料已寫入 Google 試算表！", "success");
+                } catch (err) {
+                    console.error("GAS Update Error:", err);
+                }
+            }
+
+            btnSave.disabled = false;
+            btnSave.innerText = "儲存修改 (Update)";
+
+            closeEditModal();
+            updateRegistrantStats();
+            renderRegistrantsTable();
+        }
+
+        async function deleteRegistrant(studentId) {
+            registrants = registrants.filter(r => r.id !== studentId);
+            updateRegistrantStats();
+            renderRegistrantsTable();
+
+            if (gasApiUrl) {
+                try {
+                    await fetch(gasApiUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete', id: studentId, studentId: studentId })
+                    });
+                    showToast("已從 Google 試算表刪除該資料！", "success");
+                } catch (err) {
+                    console.error("GAS Delete Error:", err);
+                }
+            } else {
+                showToast("已刪除該筆報名資料", "info");
+            }
+        }
+
+        function updateRegistrantStats() {
+            const count = registrants.length;
+            document.getElementById('attendeeCount').innerText = count;
+            document.getElementById('totalCountText').innerText = count;
+            document.getElementById('capacityStatusText').innerText = `已報名 ${count} / ${TOTAL_CAPACITY} 名`;
+
+            const percentage = Math.min(100, Math.round((count / TOTAL_CAPACITY) * 100));
+            document.getElementById('capacityBar').style.width = `${percentage}%`;
+        }
+
+        function renderRegistrantsTable() {
+            const tbody = document.getElementById('registrantsTableBody');
+            const searchVal = (document.getElementById('searchFilter')?.value || '').toLowerCase();
+            const groupVal = document.getElementById('groupFilter')?.value || 'ALL';
+
+            const filtered = registrants.filter(r => {
+                const matchSearch = (r.id || '').toLowerCase().includes(searchVal) || (r.name || '').toLowerCase().includes(searchVal);
+                const matchGroup = groupVal === 'ALL' || r.group === groupVal;
+                return matchSearch && matchGroup;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">尚無符合條件的報名資料</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((r, index) => {
+                let badgeClass = "bg-blue-500/20 text-blue-300 border-blue-500/30";
+                if (r.group === 'B') badgeClass = "bg-purple-500/20 text-purple-300 border-purple-500/30";
+                if (r.group === 'C') badgeClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+
+                return `
+                    <tr class="hover:bg-slate-900/80 transition">
+                        <td class="p-3 font-mono text-slate-500">${index + 1}</td>
+                        <td class="p-3 font-mono font-bold text-white">${r.id}</td>
+                        <td class="p-3 font-semibold text-slate-200">${r.name}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">Group ${r.group}</span>
+                        </td>
+                        <td class="p-3 font-mono text-slate-400">${r.email || '--'}</td>
+                        <td class="p-3 text-slate-500 font-mono">${r.time}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center space-x-1.5">
+                                <button onclick="openEditModal('${r.id}')" class="px-2.5 py-1 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition text-[11px] border border-blue-500/20">
+                                    <i class="fa-solid fa-pen"></i> 修改
+                                </button>
+                                <button onclick="deleteRegistrant('${r.id}')" class="px-2.5 py-1 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 rounded-lg transition text-[11px] border border-rose-500/20">
+                                    <i class="fa-solid fa-trash"></i> 刪除
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openGmailTemplateModal() {
+            const template = `親愛的同學您好：\n\n感謝您報名【2026 經濟學系秋季探索營 - 經濟脈動與數據賽局】！\n\n【活動資訊】\n■ 活動時間：2026 年 10 月 07 日 (三) 晚上 19:00 - 21:00\n■ 活動地點：經濟系館 101 講堂\n■ 活動內容：個體/總體經濟動態、數據決策與行為賽局實驗\n\n請於活動當天 18:45 前完成報到簽到。期待您的參與！\n\n國立大學 經濟學系營隊籌備小組 敬上`;
+            document.getElementById('gmailContentText').value = template;
+            document.getElementById('gmailModal').classList.remove('hidden');
+            document.getElementById('gmailModal').classList.add('flex');
+        }
+
+        function closeGmailModal() {
+            document.getElementById('gmailModal').classList.remove('flex');
+            document.getElementById('gmailModal').classList.add('hidden');
+        }
+
+        function copyGmailTemplate() {
+            const textarea = document.getElementById('gmailContentText');
+            textarea.select();
+            document.execCommand('copy');
+            showToast("已複製 Gmail 通知信範本！", "success");
+        }
+
+        function copyPassDetails() {
+            const name = document.getElementById('mStudentName').innerText;
+            const id = document.getElementById('mStudentId').innerText;
+            const group = document.getElementById('mGroupName').innerText;
+            const passCode = document.getElementById('mTicketCode').innerText;
+
+            const passText = `【經濟系營隊 - 活動入場核驗憑證】\n----------------------------\n學員姓名：${name}\n報名學號：${id}\n分配組別：${group}\n入場核驗碼：${passCode}\n活動時間：10/07 (三) 晚上 19:00 - 21:00\n入場地點：經濟系館 101 講堂\n----------------------------`;
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = passText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast("入場憑證已複製至剪貼簿！", "success");
+        }
+
+        function showFieldError(id, show) {
+            const el = document.getElementById(id);
+            if (show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        function openSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const modalCard = document.getElementById('successModalCard');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalCard.classList.remove('scale-95', 'opacity-0');
+                modalCard.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const modalCard = document.getElementById('successModalCard');
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function openPasswordModal() {
+            const pwdInput = document.getElementById('adminPassword');
+            pwdInput.value = '';
+            document.getElementById('errPassword').classList.add('hidden');
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => pwdInput.focus(), 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function verifyPassword(e) {
+            e.preventDefault();
+            const inputPwd = document.getElementById('adminPassword').value;
+            if (inputPwd === "1234") {
+                closePasswordModal();
+                toggleRegistrantsModal(true);
+                showToast("密碼驗證成功，進入管理介面！", "success");
+            } else {
+                document.getElementById('errPassword').classList.remove('hidden');
+            }
+        }
+
+        function toggleRegistrantsModal(show) {
+            const modal = document.getElementById('registrantsModal');
+            if (show) {
+                renderRegistrantsTable();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = message;
+            if (type === "success") toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+            else if (type === "warning") toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-base";
+            else toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-base";
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
